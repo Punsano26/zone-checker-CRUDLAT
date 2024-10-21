@@ -1,6 +1,6 @@
-const Library = require("../models/store.model");
+const Store = require("../models/store.model");
 
-//create and Save a new Library
+//create and Save a new Store
 exports.create = async (req, res) => {
   const { storeName, adminId, address, lat, lng, deliveryRadius } = req.body;
   console.log(req.body);
@@ -12,14 +12,14 @@ exports.create = async (req, res) => {
         " storeName, adminId, address, lat, lng, deliveryRadius required!",
     });
   }
-  await Library.findOne({ where: { storeName: req.body.storeName } }).then(
-    (library) => {
-      if (library) {
-        res.status(400).send({ message: "Library already exists" });
+  await Store.findOne({ where: { storeName: req.body.storeName } }).then(
+    (store) => {
+      if (store) {
+        res.status(400).send({ message: "Store already exists" });
         return;
       }
       //create a new book
-      const newBook = {
+      const newStore = {
         storeName,
         adminId,
         address,
@@ -27,7 +27,7 @@ exports.create = async (req, res) => {
         lng,
         deliveryRadius,
       };
-      Library.create(newBook)
+      Store.create(newStore)
         .then((data) => {
           res.send(data);
         })
@@ -35,23 +35,23 @@ exports.create = async (req, res) => {
           res.status(500).send({
             message:
               err.message ||
-              "Something error occurred while creating the Library.",
+              "Something error occurred while creating the Store.",
           });
         });
     }
   );
 };
 
-//Get all Library
+//Get all Store
 exports.getAll = async (req, res) => {
-  await Library.findAll()
+  await Store.findAll()
     .then((data) => {
       res.send(data);
     })
     .catch((error) => {
       res.status(500).send({
         message:
-          error.message || "Somthing error occurred while retrieving Library.",
+          error.message || "Somthing error occurred while retrieving Store.",
       });
     });
 };
@@ -59,10 +59,10 @@ exports.getAll = async (req, res) => {
 //Get By ID
 exports.getById = async (req, res) => {
   const id = req.params.id;
-  await Library.findByPk(id)
+  await Store.findByPk(id)
     .then((data) => {
       if (!data) {
-        res.status(400).send({ message: "No found Library with id =" + id });
+        res.status(400).send({ message: "No found Store with id =" + id });
       } else {
         res.send(data);
       }
@@ -70,51 +70,53 @@ exports.getById = async (req, res) => {
     .catch((error) => {
       res.status(500).send({
         message:
-          error.message || "Somthing error occurred while retrieving Library.",
+          error.message || "Somthing error occurred while retrieving Store.",
       });
     });
 };
 
-//Update a Library
+//Update a Store
 exports.update = async (req, res) => {
   const id = req.params.id;
-  await Library.update(req.body, { where: { bookID: id } })
+  await Store.update(req.body, { where: { bookID: id } })
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: "Library was updated successfully.",
+          message: "Store was updated successfully.",
         });
       } else {
         res.send({
-          message: `Cannot update Library with id=${id}. Maybe Library was not found or req.body is empty!`,
+          message: `Cannot update Store with id=${id}. Maybe Store was not found or req.body is empty!`,
         });
       }
     })
     .catch((error) => {
       res.status(500).send({
         message:
-          error.message || "Somthing error occurred while updating Library.",
+          error.message || "Somthing error occurred while updating Store.",
       });
     });
 };
 
-//Delete a Library
+//Delete a Store
 exports.deleteById = async (req, res) => {
   const id = req.params.id;
-  await Library.destroy({ where: { bookID: id } }).then((num) => {
-    if (num == 1) {
-      res.send({
-        message: "Library was deleted successfully!",
+  await Store.destroy({ where: { bookID: id } })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: "Store was deleted successfully!",
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Store with id=${id}. Maybe Store was not found!`,
+        });
+      }
+    })
+    .catch((error) => {
+      res.status(500).send({
+        message:
+          error.message || "Somthing error occurred while deleting Store.",
       });
-    } else {
-      res.send({
-        message: `Cannot delete Library with id=${id}. Maybe Library was not found!`,
-      });
-    }
-  }).catch((error) => {
-    res.status(500).send({
-      message:
-        error.message || "Somthing error occurred while deleting Library.",
     });
-  });
 };

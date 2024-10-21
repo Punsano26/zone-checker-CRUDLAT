@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 require("dotenv").config(".env");
 const PORT = process.env.PORT || 2000;
-const libraryRouter = require("./routers/library.router");
+const storeRouter = require("./routers/store.router");
 const authRouter = require("./routers/auth.router");
 const db = require("./models/index");
 const role = db.Role
@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 
   //use Router
   app.use("/api/v1/auth", authRouter);
-  app.use("/api/v1/libraries", libraryRouter);
+  app.use("/api/v1/stores", storeRouter);
 
 
   app.get("/", (req, res) => {
