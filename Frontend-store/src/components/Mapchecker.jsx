@@ -1,182 +1,215 @@
-import { useEffect, useState } from "react"; //
-import {
-  MapContainer,
-  TileLayer,
-  Popup,
-  Marker,
-  Circle,
-  useMapEvents,
-} from "react-leaflet"; //
-import "leaflet/dist/leaflet.css"; //
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Swal from "sweetalert2";
-import { icon, Icon } from "leaflet";
+// MyLocation map
 import StoreService from "../services/store.service";
-import { useAuthContext } from "../contexts/AuthContext";
+const storeIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/128/9198/9198446.png",
+  iconSize: [38, 38],
+  iconAnchor: [22, 38],
+  popupAnchor: [0, -40],
+});
 
-const Mapchecker = ({
-  myLocation,
-  setMyLocation,
-  deliveryZone,
-  setDeliveryZone,
-}) => {
-  const center = [13.838492331040143, 100.02533605919358]; //NPRU
+const houseIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/128/7720/7720526.png",
+  iconSize: [38, 38],
+  iconAnchor: [22, 38],
+  popupAnchor: [0, -40],
+});
+
+// Custom icon for selected store
+const selectedStoreIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/128/7877/7877890.png", // ไอคอนใหม่สำหรับร้านค้าเมื่อถูกเลือก
+  iconSize: [38, 38],
+  iconAnchor: [22, 38],
+  popupAnchor: [0, -40],
+});
+
+function Mapchecker() {
+  const center = [13.838500199744178, 100.02534412184882];
   const [stores, setStores] = useState([]);
-  const { user } = useAuthContext();
+  const [myLocation, setMylocation] = useState({ lat: "", lng: "" });
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [activeStore, setActiveStore] = useState(null);
+  const [deliveryZone, setDeliveryZone] = useState({
+    lat: null,
+    lng: null,
+    radius: 1000,
+  });
+
+  const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 6371e3; // Earth radius in meters
+    const phi_1 = (lat1 * Math.PI) / 180;
+    const phi_2 = (lat2 * Math.PI) / 180;
+
+    const delta_phi = ((lat2 - lat1) * Math.PI) / 180;
+    const delta_lambda = ((lng2 - lng1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(delta_phi / 2) * Math.sin(delta_phi / 2) +
+      Math.cos(phi_1) *
+        Math.cos(phi_2) *
+        Math.sin(delta_lambda / 2) *
+        Math.sin(delta_lambda / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in meters
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStores = async () => {
       try {
-        const response = await StoreService.getAllStore();
-        if (response.status === 200) {
-          console.log("response.data:", response.data);
-          
-          setStores(response.data);
-        }
+        const data = await StoreService.getAllStore();
+        setStores(data);
       } catch (error) {
-        console.log("error fetch data Stores!!", error);
+        console.error("Error fetching store data:", error);
       }
     };
-    fetchData();
+    fetchStores();
   }, []);
 
-  const LocationMap = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setMyLocation({ lat, lng });
-      },
+  const handleGetLocation = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setMylocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
     });
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = await Swal.fire({
-      title: "คุณแน่ใจแล้วหรือไม่ ที่จะลบมัน?",
-      text: "คิดให้ดีๆนะสู? ",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#056f00",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "ใช่, ลบทิ้ง!",
-      cancelButtonText: "ไม่, ยกเลิก!",
-    });
-    if (confirmDelete.isConfirmed) {
-      try {
-        const response = await StoreService.deletestore(id);
-        if (response.status === 200) {
-          Swal.fire({
-            title: "ลบร้านค้าสำเร็จ",
-            text: response.data.message,
-            icon: "success",
-          }).then(() => {
-            window.location.reload();
-          });
-        }
-      } catch (error) {
-        Swal.fire({
-          title: "ลบร้านค้าล้มเหลว",
-          text: error?.response?.data?.message || error.message,
-          icon: "error",
-        });
-      }
+  const handleLocationCheck = () => {
+    if (!myLocation.lat && !myLocation.lng) {
+      Swal.fire({
+        title: "Error!",
+        text: "Please enter your valid location",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
     }
-  };
 
-  return (
-    <>
-      <MapContainer
-        center={center}
-        zoom={13}
-        scrollWheelZoom={true}
-        style={{ height: "80vh", width: "80vw" }}
-        className="shadow-lg rounded-lg"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {/* แสดงตำแหน่งที่คลิก */}
-        {myLocation?.lat && myLocation?.lng && (
-          <Marker position={[myLocation.lat, myLocation.lng]}>
-            <Popup>
-              ตำแหน่งที่เลือก: <br />
-              Latitude: {myLocation.lat}, Longitude: {myLocation.lng}
-            </Popup>
-          </Marker>
-        )}
+    if (!selectedStore) {
+      Swal.fire({
+        title: "Error!",
+        text: "Please select a store",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
 
-        {stores &&
-          stores.map((store) => {
-            return (
+    const distance = calculateDistance(
+      myLocation.lat,
+      myLocation.lng,
+      selectedStore.lat,
+      selectedStore.lng
+    );
+
+    if (distance <= selectedStore.radius) {
+      Swal.fire({
+        title: "Success",
+        text: "You are within the delivery zone for " + selectedStore.name,
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+    } else {
+      Swal.fire({
+        title: "Error!",
+        text: "You are outside the delivery zone for " + selectedStore.name,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+    return (
+      <>
+        <div className="button-container">
+          <button className="get-location-btn" onClick={handleGetLocation}>
+            Get My Location
+          </button>
+          <button className="get-location-btn" onClick={handleGetLocation}>
+            Check Delivery Availability
+          </button>
+        </div>
+
+        <div>
+          <MapContainer
+            center={center}
+            zoom={13}
+            style={{ height: "75vh", width: "100vw" }}
+          />
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          {stores.map((store) => {
+            const distance = calculateDistance(
+              myLocation.lat,
+              myLocation.lng,
+              store.lat,
+              store.lng
+            );
+            const icon =
+              distance <= deliveryZone.radius ? houseIcon : storeIcon;
+
+          return(
               <Marker
                 key={store.storeID}
                 position={[store.lat, store.lng]}
+                icon={icon}
                 eventHandlers={{
                   click: () => {
-                    setDeliveryZone(store);
+                    setDeliveryZone({
+                      lat: store.lat,
+                      lng: store.lng,
+                      radius: store.deliveryRadius,
+                    });
+                    setActiveStore(store.storeID);
                   },
                 }}
               >
+      <Popup>
+                <b>{store.name}</b>
+                <p>{store.address}</p>
+                <a 
+                href={store.direction}
+                target="_blank"
+                rel="noopener noreferrer"
+                >
+                  ดูเส้นทาง
+                </a>
+                 {/* ปุ่มแก้ไข */}
+                  {/* ปุ่มแก้ไข */}
+      </Popup>
+      </Marker>
+    );
+    })}
+      {myLocation.lat && myLocation.lng && (
+        <>
+           <Marker
+                position={[myLocation.lat, myLocation.lng]}
+                icon={
+                  new Icon({
+                    iconUrl: houseIcon,
+                    iconSize: [35, 35],
+                  })
+                }
+              >
                 <Popup>
-                  <b>{store.storeName}</b>
-                  <p>{store.address}</p>
-                  <a
-                    href={store.direction}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Get Direction
-                  </a>
-                  {user &&
-                    (user.roles.includes("ROLES_MODERATOR") ||
-                      user.roles.includes("ROLES_ADMIN")) && (
-                      <div className="card-actions flex justify-center items-center p-2">
-                        {/* ปุ่มลบจะแสดงเมื่อ user เป็น ADMIN และ user.id ตรงกับ store.userId */}
-                        {user.roles.includes("ROLES_ADMIN") &&
-                          user.id === store.userId && (
-                            <button
-                              className="btn btn-sm btn-error"
-                              type="button"
-                              onClick={() => handleDelete(store.id)}
-                            >
-                              ลบ
-                            </button>
-                          )}
-                        {/* ตรวจสอบว่า user.id ตรงกับ store.userId ก่อนแสดงปุ่มแก้ไข */}
-                        {user.id === store.userId && (
-                          <a
-                            href={`/edit/${store.id}`}
-                            className="btn btn-sm btn-warning !text-black"
-                            type="button"
-                          >
-                            แก้ไข
-                          </a>
-                        )}
-                      </div>
-                    )}
+                  <b>My Location</b>
                 </Popup>
-                {deliveryZone && deliveryZone.storeID === store.storeID && (
-                  <Circle
-                    center={[store.lat, store.lng]}
-                    radius={deliveryZone.deliveryRadius || 100} // ใช้ radius จาก deliveryZone
-                    pathOptions={{
-                      color: "#F5EED8",
-                      fillColor: "#c4bcac",
-                      fillOpacity: 0.3,
-                    }}
-                  />
-                )}
-                {console.log("deliveryRadius:", deliveryZone)}; // ตรวจสอบค่าของ
-                deliveryRadius
-                {console.log("deliveryRadius:", deliveryZone?.deliveryRadius)};
-                // ตรวจสอบ radius
               </Marker>
-            );
-          })}
-        <LocationMap />
-      </MapContainer>
-    </>
-  );
-};
+        </>
+      )}
+      
+
+
+        </div>
+      </>
+    );
+  };
+}
 
 export default Mapchecker;

@@ -78,7 +78,7 @@ exports.getById = async (req, res) => {
 //Update a Store
 exports.update = async (req, res) => {
   const id = req.params.id;
-  await Store.update(req.body, { where: { bookID: id } })
+  await Store.update(req.body, { where: { storeID: id } })
     .then((num) => {
       if (num == 1) {
         res.send({
@@ -101,7 +101,7 @@ exports.update = async (req, res) => {
 //Delete a Store
 exports.deleteById = async (req, res) => {
   const id = req.params.id;
-  await Store.destroy({ where: { bookID: id } })
+  await Store.destroy({ where: { storeID: id } })
     .then((num) => {
       if (num == 1) {
         res.send({
