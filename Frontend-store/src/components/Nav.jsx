@@ -45,7 +45,7 @@ const Nav = () => {
                 d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
-            Add a Book
+            Add a locations Store
           </span>
         ),
         link: "/add",
@@ -70,7 +70,7 @@ const Nav = () => {
                 d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
-            Add a Book
+            Add a locations Store
           </span>
         ),
         link: "/add",
@@ -84,9 +84,9 @@ const Nav = () => {
     <div className="flex-1">
       <a href="/" className="btn btn-ghost text-xl">
         <span className="text-base-100 font-bold text-red-600 text-3xl font-thin">
-          LIBRARY
+          Lat Lng
         </span>{" "}
-        Manage
+        Stores
       </a>
     </div>
   

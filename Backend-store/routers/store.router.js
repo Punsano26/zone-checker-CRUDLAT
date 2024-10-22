@@ -5,7 +5,7 @@ const storeController = require("../controllers/store.controller");
 const { authJwt } = require("../middlewares");
 
 //create a stores
-//POST http://localhost:3000/api/v1/stores
+//POST http://localhost:2000/api/v1/stores
 router.post(
   "/",
   [authJwt.verifyToken, authJwt.isAdminOrMod],
