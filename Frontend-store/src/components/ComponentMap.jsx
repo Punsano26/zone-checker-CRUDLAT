@@ -207,7 +207,9 @@ const ComponentMap = () => {
           Swal.fire({
             icon: "error",
             title: "ลบ ล้มเหลว!",
-            text: "ไม่สามารถยืนยันการลบได้! เนื่องจากคุณไม่ได้เป็นเจ้าของ" + error.message,
+            text:
+              "ไม่สามารถยืนยันการลบได้! เนื่องจากคุณไม่ได้เป็นเจ้าของ" +
+              error.message,
           });
         }
       }
@@ -216,16 +218,19 @@ const ComponentMap = () => {
 
   return (
     <>
+      <h1 className="text-center text-3xl font-bold font-serif mb-5">
+        <span className="text-red-500">Lat Lng</span> Derivery Zone Stroe
+      </h1>
       <div className="text-center">
-        <div className="flex justify-center items-center space-x-4 p-2">
+        <div className="flex justify-center items-center space-x-10 p-2 mb-2">
           <button
-            className="btn bg-[#50c478] text-white"
+            className="btn bg-[#50c478] text-white mb-3"
             onClick={handleGetLocation}
           >
             Get My Location
           </button>
           <button
-            className="btn bg-[#59b85f] text-white"
+            className="btn bg-[#59b85f] text-white mb-3"
             onClick={handleLocationCheck}
           >
             Check Delivery Availability
@@ -335,6 +340,12 @@ const ComponentMap = () => {
                           className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
                         >
                           ลบ
+                        </button>
+                      )}
+
+                      {user && user.roles.includes("ROLE_USER") && (
+                        <button className="text-blue-500 text-sm bg-sky-100 rounded-md px-2 py-1 hover:bg-slate-400">
+                          ช้อปเลย!
                         </button>
                       )}
                     </div>

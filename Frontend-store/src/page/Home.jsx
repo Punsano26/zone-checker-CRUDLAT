@@ -6,7 +6,7 @@ const Home = () => {
     <div>
       
     {/* <Navbar/> */}
-      <div className="mt-24"></div>
+      <div className="mt-10"></div>
       <ComponentMap />
     </div>
   );
