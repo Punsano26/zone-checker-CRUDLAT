@@ -80,7 +80,7 @@ const AddLocation = () => {
         Swal.fire({
           position: 'center',
           icon: 'success',
-          title: 'เพิ่มสถานที่สำเร็จ',
+          title: 'ยินดีด้วย คุณเพิ่มข้อมูลร้านสำเร็จ',
           text: response.data.message,
           timer: 2000,
         }).then(() => {
@@ -138,7 +138,7 @@ const AddLocation = () => {
         {/* DMS Input */}
         <div className="mb-4 flex items-center gap-2">
           <div className="flex-grow">
-            <label className="block text-sm font-medium mb-1">DMS Coordinates</label>
+            <label className="block text-sm font-medium mb-1">Latitude & Longitude</label>
             <input
               type="text"
               name="dms"

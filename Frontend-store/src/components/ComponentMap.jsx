@@ -29,7 +29,7 @@ const ComponentMap = () => {
 
   // Define store and house icons
   const storeIcon = new Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/128/9198/9198446.png",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/869/869636.png",
     iconSize: [38, 38],
     iconAnchor: [22, 38],
     popupAnchor: [0, -40],
@@ -44,7 +44,7 @@ const ComponentMap = () => {
 
   // Custom icon for selected store
   const selectedStoreIcon = new Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/128/7877/7877890.png",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/17001/17001986.png",
     iconSize: [38, 38],
     iconAnchor: [22, 38],
     popupAnchor: [0, -40],
@@ -55,7 +55,7 @@ const ComponentMap = () => {
     iconSize: [38, 38],
     iconAnchor: [22, 38],
     popupAnchor: [0, -40],
-  })
+  });
 
   // Function to calculate distance between 2 points using Haversine Formula
   const calculateDistance = (lat1, lng1, lat2, lng2) => {
@@ -179,29 +179,26 @@ const ComponentMap = () => {
 
   // Handle store deletion
   const handleDeleteStore = async (storeID) => {
-
     Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "ยืนยันการลบข้อมูลร้าน?",
+      text: "คุณแน่ใจว่าตัดสินใจดีแล้ว",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonText: "แน่นอน, ฉันจะลบ!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const response = await StoreService.deletestore(storeID);
           if (response.status === 200) {
-            Swal.fire(
-              {
-                position: "center",
-                icon: "success",
-                title: "ลบทิ้งไปแล้ว!",
-                text: "ไอกระจอกไม่มีปัญญาบริหารร้าน ลบๆไปเหอะ!",
-                timer: 7000,
-              }
-            ).then(() => {
+            Swal.fire({
+              position: "center",
+              icon: "success",
+              title: "ลบทิ้งไปแล้ว!",
+              text: "ไอกระจอกไม่มีปัญญาบริหารร้าน ลบๆไปเหอะ!",
+              timer: 7000,
+            }).then(() => {
               // Refresh page or state after deletion
               window.location.reload();
             });
@@ -209,8 +206,8 @@ const ComponentMap = () => {
         } catch (error) {
           Swal.fire({
             icon: "error",
-            title: "Error",
-            text: "Error deleting store: " + error.message,
+            title: "ลบ ล้มเหลว!",
+            text: "ไม่สามารถยืนยันการลบได้! เนื่องจากคุณไม่ได้เป็นเจ้าของ" + error.message,
           });
         }
       }
@@ -255,16 +252,26 @@ const ComponentMap = () => {
                 store.lat,
                 store.lng
               );
-              const icon =
-                distance <= deliveryZone.deliveryRadius
-                  ? storeIcon
-                  : selectedStoreIcon;
+              let icon = storeIcon; // Default icon
+              let popupMessage = ""; // Default popup message
+
+              // Check if the store is owned by the logged-in admin user
+              if (user && store.adminId === user.id) {
+                icon = myStoreIsadmin; // Change icon for admin-owned stores
+                popupMessage = "คุณเป็นเจ้าของร้านนี้!";
+                // Ownership message
+              }
+
+              // Adjust icon based on delivery zone
+              if (distance <= deliveryZone.deliveryRadius) {
+                icon = selectedStoreIcon; // Change to selected icon if within delivery radius
+              }
 
               return (
                 <Marker
                   key={store.storeID}
                   position={[store.lat, store.lng]}
-                  icon={icon} // Use the icon variable
+                  icon={icon}
                   eventHandlers={{
                     click: () => {
                       setDeliveryZone({
@@ -272,71 +279,73 @@ const ComponentMap = () => {
                         lng: store.lng,
                         deliveryRadius: store.deliveryRadius,
                       });
-                      setActiveStore(store.storeID); // Use store.storeID for activeStore
+                      setActiveStore(store.storeID);
                     },
                   }}
                 >
-                 <Popup>
-  <strong>{store.storeName}</strong> <br />
-  {store.address} <br />
-  ระยะทาง: {distance.toFixed(2)} เมตร <br />
-  <a
-    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-      store.lat
-    )},${encodeURIComponent(store.lng)}`}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    ดูเส้นทาง
-  </a>
-  <br />
-  {/* Circle for delivery area if active */}
-  {activeStore === store.storeID && store.deliveryRadius > 0 && (
-    <Circle
-      center={[store.lat, store.lng]}
-      radius={store.deliveryRadius}
-      pathOptions={{
-        color: "#B6BBC7",
-        fillColor: "#9292D1",
-        fillOpacity: 0.5,
-      }}
-    />
-  )}
-  
-  {/* Edit and Delete Buttons */}
-  <div className="flex justify-between mt-2">
-  {user && 
-  (user.roles.includes("ROLE_ADMIN") ||
-  user.roles.includes(ROLE_MODERATOR)) && (
-    
-      <a
-      onClick={() => handleEdit(store.storeID)} // ฟังก์ชันสำหรับแก้ไข
-      className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
-      href={`/edit/${store.storeID}`}
-    >
-      แก้ไข
-    </a>
-  )}
-  
-  
-    {user && user.roles.includes("ROLE_ADMIN")&&(
-    <button
-      onClick={() => handleDeleteStore(store.storeID)} // ฟังก์ชันสำหรับลบ
-      className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
-    >
-      ลบ
-    </button>
-      )}
-  </div>
-</Popup>
+                  <Popup>
+                    <strong>{store.storeName}</strong> <br />
+                    {store.address} <br />
+                    ระยะทาง: {distance.toFixed(2)} เมตร <br />
+                    {popupMessage && (
+                      <div className="bg-green-100 text-green-800 rounded-full px-4  w-36 border-spacing-1">
+                        {popupMessage}
+                      </div>
+                    )}{" "}
+                    {/* Show ownership message */}
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                        store.lat
+                      )},${encodeURIComponent(store.lng)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      ดูเส้นทาง
+                    </a>
+                    <br />
+                    {/* Circle for delivery area if active */}
+                    {activeStore === store.storeID && store.deliveryRadius > 0 && (
+                      <Circle
+                        center={[store.lat, store.lng]}
+                        radius={store.deliveryRadius}
+                        pathOptions={{
+                          color: "#B6BBC7",
+                          fillColor: "#9292D1",
+                          fillOpacity: 0.5,
+                        }}
+                      />
+                    )}
+                    {/* Edit and Delete Buttons */}
+                    <div className="flex justify-between mt-2">
+                      {user &&
+                        (user.roles.includes("ROLE_ADMIN") ||
+                          user.roles.includes("ROLE_MODERATOR")) && (
+                          <a
+                            onClick={() => handleEdit(store.storeID)}
+                            className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
+                            href={`/edit/${store.storeID}`}
+                          >
+                            แก้ไข
+                          </a>
+                        )}
 
+                      {user && user.roles.includes("ROLE_ADMIN") && (
+                        <button
+                          onClick={() => handleDeleteStore(store.storeID)}
+                          className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
+                        >
+                          ลบ
+                        </button>
+                      )}
+                    </div>
+                  </Popup>
                 </Marker>
               );
             })}
           {myLocation.lat && myLocation.lng && (
             <Marker
               position={[myLocation.lat, myLocation.lng]}
-              icon={houseIcon} // Use house icon
+              icon={houseIcon}
             >
               <Popup>
                 <strong>Your Location</strong>
