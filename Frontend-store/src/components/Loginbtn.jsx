@@ -10,4 +10,4 @@ const Loginbtn = () => {
   </a>
 }
 
-export default Loginbtn
+export default Loginbtn;
