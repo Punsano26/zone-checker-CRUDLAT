@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const storeController = require("../controllers/store.controller");
-
+const verifyStoreAdmin = require("../middlewares/veryfyStoreAdmin");
 const { authJwt } = require("../middlewares");
 
 //create a stores
@@ -20,17 +20,17 @@ router.get("/", storeController.getAll);
 //GET http://localhost:3000/api/v1/stores/:id
 router.get("/:id", [authJwt.verifyToken], storeController.getById);
 
-//Update store Router
+// แก้ไขร้าน (เฉพาะ Admin ของร้านเท่านั้น)
 router.put(
   "/:id",
-  [authJwt.verifyToken, authJwt.isAdminOrMod],
+  [authJwt.verifyToken, verifyStoreAdmin.checkStoreAdmin], // ตรวจสอบสิทธิ์ Admin
   storeController.update
 );
 
-//delete store Router
+// ลบร้าน (เฉพาะ Admin ของร้านเท่านั้น)
 router.delete(
   "/:id",
-  [authJwt.verifyToken, authJwt.isAdminOrMod],
+  [authJwt.verifyToken, verifyStoreAdmin.checkStoreAdmin], // ตรวจสอบสิทธิ์ Admin
   storeController.deleteById
 );
 module.exports = router;

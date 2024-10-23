@@ -305,19 +305,28 @@ const ComponentMap = () => {
   
   {/* Edit and Delete Buttons */}
   <div className="flex justify-between mt-2">
-    <a
+  {user && 
+  (user.roles.includes("ROLE_ADMIN") ||
+  user.roles.includes(ROLE_MODERATOR)) && (
+    
+      <a
       onClick={() => handleEdit(store.storeID)} // ฟังก์ชันสำหรับแก้ไข
       className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
       href={`/edit/${store.storeID}`}
     >
       แก้ไข
     </a>
+  )}
+  
+  
+    {user && user.roles.includes("ROLE_ADMIN")&&(
     <button
       onClick={() => handleDeleteStore(store.storeID)} // ฟังก์ชันสำหรับลบ
       className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
     >
       ลบ
     </button>
+      )}
   </div>
 </Popup>
 
