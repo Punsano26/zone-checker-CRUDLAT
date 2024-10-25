@@ -134,8 +134,8 @@ const ComponentMap = () => {
     const distance = calculateDistance(
       myLocation.lat,
       myLocation.lng,
-      store.lat,
-      store.lng
+      deliveryZone.lat,
+      deliveryZone.lng
     );
 
     if (distance <= deliveryZone.deliveryRadius) {
