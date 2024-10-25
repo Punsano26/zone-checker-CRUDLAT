@@ -334,7 +334,7 @@ const ComponentMap = () => {
                           </a>
                         )}
 
-                      {user && user.roles.includes("ROLE_ADMIN") && (
+                      {user && user.roles.includes("ROLE_ADMIN") && user.id === store.adminId && (
                         <button
                           onClick={() => handleDeleteStore(store.storeID)}
                           className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
