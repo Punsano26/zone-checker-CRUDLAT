@@ -324,7 +324,7 @@ const ComponentMap = () => {
                     <div className="flex justify-between mt-2">
                       {user &&
                         (user.roles.includes("ROLE_ADMIN") ||
-                          user.roles.includes("ROLE_MODERATOR")) && (
+                          user.roles.includes("ROLE_MODERATOR")) && user.id === store.adminId && (
                           <a
                             onClick={() => handleEdit(store.storeID)}
                             className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
