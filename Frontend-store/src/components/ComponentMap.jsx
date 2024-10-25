@@ -125,6 +125,9 @@ const ComponentMap = () => {
         icon: "error",
         confirmButtonText: "OK",
       });
+      setDeliveryZone({ lat: "",
+    lng: "",
+    deliveryRadius: 0,})
       return;
     }
 
