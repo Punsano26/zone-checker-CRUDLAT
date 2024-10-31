@@ -196,7 +196,7 @@ const ComponentMap = () => {
               position: "center",
               icon: "success",
               title: "ลบทิ้งไปแล้ว!",
-              text: "ไอกระจอกไม่มีปัญญาบริหารร้าน ลบๆไปเหอะ!",
+              text: "ลบเรียบร้อยแล้ว!",
               timer: 7000,
             }).then(() => {
               // Refresh page or state after deletion
@@ -235,6 +235,11 @@ const ComponentMap = () => {
           >
             Check Delivery Availability
           </button>
+          {user && user.roles.includes("ROLE_ADMIN") && (
+          <a class="bg-blue-500 hover:bg-blue-700 text-white mb-3 font-bold py-2 px-4 rounded-full" href="editstore">
+            Edit Store
+          </a>
+          )}
         </div>
       </div>
 
@@ -250,109 +255,105 @@ const ComponentMap = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           {stores &&
-            stores.map((store) => {
-              const distance = calculateDistance(
-                myLocation.lat,
-                myLocation.lng,
-                store.lat,
-                store.lng
-              );
-              let icon = storeIcon; // Default icon
-              let popupMessage = ""; // Default popup message
+  stores.map((store) => {
+    const distance = calculateDistance(
+      myLocation.lat,
+      myLocation.lng,
+      store.lat,
+      store.lng
+    );
+    let icon = storeIcon; // Default icon
+    let popupMessage = ""; // Default popup message
 
-              // Check if the store is owned by the logged-in admin user
-              if (user && store.adminId === user.id) {
-                icon = myStoreIsadmin; // Change icon for admin-owned stores
-                popupMessage = "คุณเป็นเจ้าของร้านนี้!";
-                // Ownership message
-              }
+    // Check if the store is owned by the logged-in admin user
+    if (user && store.adminId === user.id) {
+      icon = myStoreIsadmin; // Change icon for admin-owned stores
+      popupMessage = "คุณเป็นเจ้าของร้านนี้!"; // Ownership message
+    }
 
-              // Adjust icon based on delivery zone
-              if (distance <= deliveryZone.deliveryRadius) {
-                icon = selectedStoreIcon; // Change to selected icon if within delivery radius
-              }
+    // Adjust icon based on delivery zone
+    if (distance <= store.deliveryRadius) {
+      icon = selectedStoreIcon; // Change to selected icon if within delivery radius
+    }
 
-              return (
-                <Marker
-                  key={store.storeID}
-                  position={[store.lat, store.lng]}
-                  icon={icon}
-                  eventHandlers={{
-                    click: () => {
-                      setDeliveryZone({
-                        lat: store.lat,
-                        lng: store.lng,
-                        deliveryRadius: store.deliveryRadius,
-                      });
-                      setActiveStore(store.storeID);
-                    },
-                  }}
+    return (
+      <Marker
+        key={store.storeID}
+        position={[store.lat, store.lng]}
+        icon={icon}
+        eventHandlers={{
+          click: () => {
+            setDeliveryZone({
+              lat: store.lat,
+              lng: store.lng,
+              deliveryRadius: store.deliveryRadius,
+            });
+            setActiveStore(store.storeID);
+          },
+        }}
+      >
+        <Popup>
+          <strong>{store.storeName}</strong> <br />
+          {store.address} <br />
+          ระยะทาง: {distance.toFixed(2)} เมตร <br />
+          {popupMessage && (
+            <div className="bg-green-100 text-green-800 rounded-full px-4 w-36 border-spacing-1">
+              {popupMessage}
+            </div>
+          )}
+          {/* Link to directions */}
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(myLocation.lat)},${encodeURIComponent(myLocation.lng)}&destination=${encodeURIComponent(store.lat)},${encodeURIComponent(store.lng)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ดูเส้นทาง
+          </a>
+          <br />
+          {/* Circle for delivery area if active */}
+          {activeStore === store.storeID && store.deliveryRadius > 0 && (
+            <Circle
+              center={[store.lat, store.lng]}
+              radius={store.deliveryRadius}
+              pathOptions={{
+                color: "#B6BBC7",
+                fillColor: "#9292D1",
+                fillOpacity: 0.5,
+              }}
+            />
+          )}
+          {/* Edit and Delete Buttons */}
+          <div className="flex justify-between mt-2">
+            {user &&
+              (user.roles.includes("ROLE_ADMIN") ||
+                user.roles.includes("ROLE_MODERATOR")) && user.id === store.adminId && (
+                <a
+                  onClick={() => handleEdit(store.storeID)}
+                  className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
+                  href={`/edit/${store.storeID}`}
                 >
-                  <Popup>
-                    <strong>{store.storeName}</strong> <br />
-                    {store.address} <br />
-                    ระยะทาง: {distance.toFixed(2)} เมตร <br />
-                    {popupMessage && (
-                      <div className="bg-green-100 text-green-800 rounded-full px-4  w-36 border-spacing-1">
-                        {popupMessage}
-                      </div>
-                    )}{" "}
-                    {/* Show ownership message */}
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-                        store.lat
-                      )},${encodeURIComponent(store.lng)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      ดูเส้นทาง
-                    </a>
-                    <br />
-                    {/* Circle for delivery area if active */}
-                    {activeStore === store.storeID && store.deliveryRadius > 0 && (
-                      <Circle
-                        center={[store.lat, store.lng]}
-                        radius={store.deliveryRadius}
-                        pathOptions={{
-                          color: "#B6BBC7",
-                          fillColor: "#9292D1",
-                          fillOpacity: 0.5,
-                        }}
-                      />
-                    )}
-                    {/* Edit and Delete Buttons */}
-                    <div className="flex justify-between mt-2">
-                      {user &&
-                        (user.roles.includes("ROLE_ADMIN") ||
-                          user.roles.includes("ROLE_MODERATOR")) && user.id === store.adminId && (
-                          <a
-                            onClick={() => handleEdit(store.storeID)}
-                            className="text-blue-500 text-sm bg-slate-300 rounded-md px-2 py-1 mr-2"
-                            href={`/edit/${store.storeID}`}
-                          >
-                            แก้ไข
-                          </a>
-                        )}
+                  แก้ไข
+                </a>
+              )}
+            {user && user.roles.includes("ROLE_ADMIN") && user.id === store.adminId && (
+              <button
+                onClick={() => handleDeleteStore(store.storeID)}
+                className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
+              >
+                ลบ
+              </button>
+            )}
+            {user && user.roles.includes("ROLE_USER") && (
+              <button className="text-blue-500 text-sm bg-sky-100 rounded-md px-2 py-1 hover:bg-slate-400">
+                ช้อปเลย!
+              </button>
+            )}
+          </div>
+        </Popup>
+      </Marker>
+    );
+  })}
 
-                      {user && user.roles.includes("ROLE_ADMIN") && user.id === store.adminId && (
-                        <button
-                          onClick={() => handleDeleteStore(store.storeID)}
-                          className="text-red-500 text-sm bg-red-100 rounded-md px-2 py-1"
-                        >
-                          ลบ
-                        </button>
-                      )}
-
-                      {user && user.roles.includes("ROLE_USER") && (
-                        <button className="text-blue-500 text-sm bg-sky-100 rounded-md px-2 py-1 hover:bg-slate-400">
-                          ช้อปเลย!
-                        </button>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
           {myLocation.lat && myLocation.lng && (
             <Marker
               position={[myLocation.lat, myLocation.lng]}

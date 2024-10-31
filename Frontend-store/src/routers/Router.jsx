@@ -12,10 +12,13 @@ const Register = lazy(() => import("../page/Register"));
 // import Editbook from "../page/Editbook";
 const EditLocation = lazy(() => import("../page/EditLocation"));
 const Userprofile = lazy(() => import("../page/Userprofile"));
+const EditStore = lazy(() => import("../page/EditStore"));
+const EditModal = lazy(() => import("../components/EditModal"));
 
 import NotAllowed from "../page/NotAllowed";
 import ModOrAdminPage from "../page/ModOrAdminPage";
 import AdminPage from "../page/AdminPage";
+import RegisterPotected from "../page/RegisterPotection";
 
 
 
@@ -34,7 +37,11 @@ const router = createBrowserRouter([
       },
       {
         path: "register",
-        element: <Register />,
+        element:(
+          <RegisterPotected>
+            <Register />
+          </RegisterPotected>
+          ),
       },
       {
         path: "add",
@@ -60,6 +67,14 @@ const router = createBrowserRouter([
         path: "userprofile",
         element: <Userprofile />,
       },
+      {
+        path: "editstore",
+        element: <EditStore />,
+      },
+      {
+        path: "editmodal/:storeID",
+        element: <EditModal />,
+      }
     ],
   },
 ]);

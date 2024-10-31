@@ -44,7 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
   app.get("/", (req, res) => {
-    res.send("<h1>Hello Librarys API</h1>");
+    res.send("<h1>Hello Store derivery API</h1>");
   });
 
   app.listen(PORT, () => {
