@@ -219,7 +219,7 @@ const ComponentMap = () => {
   return (
     <>
       <h1 className="text-center text-3xl font-bold font-serif mb-5">
-        <span className="text-red-500">Lat Lng</span> Derivery Zone Stroe
+        <span className="text-red-500">Lat Long</span> Delivery Zone Store
       </h1>
       <div className="text-center">
         <div className="flex justify-center items-center space-x-10 p-2 mb-2">

@@ -88,7 +88,7 @@ const Nav = () => {
       <div className="flex-1">
         <a href="/" className="btn btn-ghost text-xl">
           <span className="text-base-100 font-bold text-red-600 text-3xl font-thin">
-            Lat Lng
+            Lat Long
           </span>{" "}
           Stores
         </a>
