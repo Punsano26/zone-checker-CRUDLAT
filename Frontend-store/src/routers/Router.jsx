@@ -69,7 +69,11 @@ const router = createBrowserRouter([
       },
       {
         path: "editstore",
-        element: <EditStore />,
+        element: (
+          <ModOrAdminPage> 
+        <EditStore />
+          </ModOrAdminPage>
+      ),
       },
       {
         path: "editmodal/:storeID",
