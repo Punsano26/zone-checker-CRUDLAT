@@ -35,6 +35,17 @@ const AddLocation = () => {
   });
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // ตรวจสอบว่าเป็นฟิลด์ Delivery Radius และค่าที่กรอกไม่ใช่ค่าติดลบ
+    if (name === "deliveryRadius" && value < 0) {
+      Swal.fire({
+        icon: "error",
+        title: "ค่าต้องไม่ติดลบ",
+        text: "กรุณากรอกจำนวนที่ไม่ติดลบ",
+      });
+      return; // หยุดการทำงาน หากค่าเป็นค่าติดลบ
+    }
     setStoreData({ ...storeData, [e.target.name]: e.target.value });
   };
 
@@ -71,11 +82,23 @@ const AddLocation = () => {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
+    
+  if (storeData.deliveryRadius <= 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'ค่ารัศมีการจัดส่งต้องมากกว่า 0',
+      text: 'กรุณากรอกค่าที่มากกว่า 0 สำหรับรัศมีการจัดส่ง',
+      timer: 2000,
+    });
+    return; 
+  }
     const newStore = { ...storeData, adminId: user.id };
 
     try {
       const response = await StoreService.addstore(newStore);
+      
       if (response.status === 200) {
         Swal.fire({
           position: 'center',

@@ -24,12 +24,29 @@ const EditLocation = () => {
   }, [storeID]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "deliveryRadius" && value < 0) {
+      Swal.fire({
+        icon: "error",
+        title: "ค่าต้องไม่ติดลบ",
+        text: "กรุณากรอกจำนวนที่ไม่ติดลบ",
+      });
+      return; // หยุดการทำงาน หากค่าเป็นค่าติดลบ
+    }
     setLocationData({ ...locationData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (locationData.deliveryRadius <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ค่ารัศมีการจัดส่งต้องมากกว่า 0',
+        text: 'กรุณากรอกค่าที่มากกว่า 0 สำหรับรัศมีการจัดส่ง',
+        timer: 2000,
+      });
+      return; 
+    }
     try {
       const response = await StoreService.updatestore(storeID, locationData); // ส่ง storeID
       if (response.status === 200) {
